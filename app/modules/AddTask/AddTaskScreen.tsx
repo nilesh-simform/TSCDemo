@@ -1,16 +1,18 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {Alert, Text, TextInput, View} from 'react-native';
 import {Button, Row} from '../../components';
 import {styles} from './AddTaskStyles';
 import Database from '../../constants/Config';
+import type {ComponentProps} from './AddTaskTypes';
+import type {SQLiteDatabase} from 'react-native-sqlite-storage';
 
-const DB = Database.getDatabase();
+const DB: SQLiteDatabase = Database.getDatabase();
 
-export const AddTask = ({route, navigation}) => {
+export const AddTask: FC<ComponentProps> = ({route, navigation}) => {
   const [taskName, setTaskName] = useState<string>('');
 
   let {userId} = route.params;
-  const addTask = () => {
+  const addTask = (): void => {
     if (!taskName) {
       Alert.alert('Enter Task Name');
       return;
@@ -19,14 +21,14 @@ export const AddTask = ({route, navigation}) => {
     DB.executeSql(
       'insert into todos (userId, title, is_completed) values (?,?,?)',
       [userId, taskName, false],
-      (result) => {
+      result => {
         setTaskName('');
-        console.log("Success",result)
-        navigation.goBack()
+        console.log('Success', result);
+        navigation.goBack();
       },
-      (e) => {
+      e => {
         console.log('Error', e);
-      }
+      },
     );
   };
 

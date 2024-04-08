@@ -6,15 +6,18 @@ import SignUpScreen from '../modules/Auth/SignUp/SignUpScreen';
 import HomeScreen from '../modules/Home/HomeScreen';
 import Database from '../constants/Config';
 import {AddTask} from '../modules/AddTask/AddTaskScreen';
+import type {User} from '../modules/Auth/SignUp/SignUpTypes';
+import type {RootStackParam, ScreenComponentProps} from './AppNavigationTypes';
+import type {SQLiteDatabase} from 'react-native-sqlite-storage';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParam>();
 
-const DB = Database.getDatabase();
+const DB: SQLiteDatabase = Database.getDatabase();
 
 function AppContainer() {
-  const [loggedInUser, setLoggedInUser] = useState();
+  const [loggedInUser, setLoggedInUser] = useState<User>();
 
-  const getLoggedInData = async () => {
+  const getLoggedInData = async (): Promise<void> => {
     DB.transaction(tx => {
       tx.executeSql('select * from active_user', [], (result, set) => {
         if (set.rows.length == 0) {
@@ -27,7 +30,7 @@ function AppContainer() {
     });
   };
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     setLoggedInUser(undefined);
 
     DB.transaction(tx => {
@@ -39,7 +42,7 @@ function AppContainer() {
     getLoggedInData();
   }, []);
 
-  const AddTaskComponent = (props) => (
+  const AddTaskComponent = (props: ScreenComponentProps<'AddTask'>) => (
     <AddTask {...props} />
   );
 
@@ -51,7 +54,7 @@ function AppContainer() {
             <Stack.Screen
               options={{headerShown: false}}
               name="Home"
-              component={(props) => {
+              component={(props: ScreenComponentProps<'Home'>) => {
                 return (
                   <HomeScreen
                     {...props}
@@ -67,7 +70,7 @@ function AppContainer() {
           <>
             <Stack.Screen
               name="SignIn"
-              component={(props) => (
+              component={(props: ScreenComponentProps<'SignIn'>) => (
                 <SignInScreen {...props} setLoggedInUser={setLoggedInUser} />
               )}
             />

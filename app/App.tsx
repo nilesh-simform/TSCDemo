@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {FC} from 'react';
 import {AppContainer} from './navigation';
 
-const App = () => {
+const App: FC<{}> = () => {
   return <AppContainer></AppContainer>;
 };
 
