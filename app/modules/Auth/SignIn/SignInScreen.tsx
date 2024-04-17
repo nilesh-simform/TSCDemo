@@ -1,16 +1,19 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {Alert, Text, TextInput, View} from 'react-native';
 import {styles} from './SignInStyles';
 import {Button, Row} from '../../../components';
 import Database from '../../../constants/Config';
+import type {ComponentProp} from './SignInTypes';
+import type {User} from '../SignUp/SignUpTypes';
+import type { ResultSet, SQLiteDatabase, Transaction } from 'react-native-sqlite-storage';
 
-const DB = Database.getDatabase();
+const DB: SQLiteDatabase = Database.getDatabase();
 
-const SignInScreen = ({navigation, setLoggedInUser}) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const SignInScreen: FC<ComponentProp> = ({navigation, setLoggedInUser}) => {
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-  const handleLogin = () => {
+  const handleLogin = (): void => {
     if (!username || !password) {
       Alert.alert('Enter all fields');
       return;
@@ -20,7 +23,7 @@ const SignInScreen = ({navigation, setLoggedInUser}) => {
       tx.executeSql(
         'select * from users where username = ? and password = ?',
         [username, password],
-        (result, set) => {
+        (result: Transaction, set: ResultSet) => {
           if (set.rows.length == 0) {
             Alert.alert('Invalid Credentials');
             return;
@@ -29,7 +32,7 @@ const SignInScreen = ({navigation, setLoggedInUser}) => {
           console.log('User Logged In Successfully', result);
           Alert.alert('User Logged In Successfully');
 
-          let obj;
+          let obj: User;
 
           console.log('___', set.rows.item(0));
           obj = set.rows.item(0);

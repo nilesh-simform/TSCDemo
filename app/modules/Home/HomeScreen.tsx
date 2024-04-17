@@ -1,13 +1,16 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {FlatList, SafeAreaView, Text, View} from 'react-native';
 import {Button, Row} from '../../components';
 import {styles} from './HomeStyles';
 import Database from '../../constants/Config';
 import {useFocusEffect} from '@react-navigation/native';
-const DB = Database.getDatabase();
+import type {HeaderProps, HomeScreenProps, Task} from './HomeScreenTypes';
+import type { ResultSet, SQLiteDatabase, Transaction } from 'react-native-sqlite-storage';
 
-const Header = ({handleLogout}) => {
-  return (
+const DB: SQLiteDatabase = Database.getDatabase();
+
+const Header: FC<HeaderProps> = ({handleLogout}) => {
+return (
     <View style={styles.header}>
       <Text numberOfLines={1} style={styles.headerText}>
         Todo List
@@ -21,16 +24,16 @@ const Header = ({handleLogout}) => {
   );
 };
 
-const HomeScreen = ({
+const HomeScreen: FC<HomeScreenProps> = ({
   handleLogout,
   navigation,
   loggedInUser,
 }) => {
-  const [userTask, setUserTasks] = useState([]);
+  const [userTask, setUserTasks] = useState<Task[]>([]);
 
   console.log('___', userTask);
 
-  const getTodos = () => {
+  const getTodos = (): void => {
     let query = 'select * from todos where userId = ?';
 
     if (loggedInUser?.role === 'Admin') {
@@ -38,13 +41,13 @@ const HomeScreen = ({
         'select title, is_completed, id, name, username, users.userId from todos, users where todos.userId = users.userId';
     }
 
-    let tasks = [];
+    let tasks: Task[] = [];
 
-    DB.transaction(tx => {
+    DB.transaction((tx: Transaction) => {
       tx.executeSql(
         query,
         [loggedInUser?.userId],
-        (result, set) => {
+        (result: Transaction, set: ResultSet) => {
           if (set.rows.length == 0) {
             return;
           }
@@ -69,7 +72,7 @@ const HomeScreen = ({
     }, []),
   );
 
-  const markAsCompleted = (id, isCompleted) => {
+  const markAsCompleted = (id: number, isCompleted: boolean): void => {
     DB.executeSql(
       'update todos set is_completed = ? where id = ?',
       [isCompleted, id],
@@ -82,7 +85,7 @@ const HomeScreen = ({
     );
   };
 
-  const deleteTask = (id) => {
+  const deleteTask = (id: number): void => {
     DB.executeSql(
       'delete from todos where id = ?',
       [id],
@@ -95,9 +98,10 @@ const HomeScreen = ({
     );
   };
 
-  const renderList = ({item}) => {
-    let username, userId;
+  const renderList = ({item}: {item: Task}) => {
+    let username;
 
+    // Discriminated Union Check
     if (item?.type === 'Admin') {
       username = item?.username;
     }
@@ -123,7 +127,7 @@ const HomeScreen = ({
     );
   };
 
-  const _keyExtractorFn = (item) => item?.id.toString();
+  const _keyExtractorFn = (item: Task): string => item?.id.toString();
 
   return (
     <SafeAreaView style={{flex: 1}}>

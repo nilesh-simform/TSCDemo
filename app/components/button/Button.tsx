@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {FC} from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import {Colors} from '../../constants';
+import type {ButtonProp} from './ButtonTypes';
 
-export const Button = ({
+export const Button: FC<ButtonProp> = ({
   onPress = () => {},
   children,
   style = {},

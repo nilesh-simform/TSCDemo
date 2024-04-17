@@ -1,23 +1,25 @@
-import React, {useEffect, useState} from 'react';
+import React, {FC, useState} from 'react';
 import {Alert, Keyboard, Text, TextInput, View} from 'react-native';
 import {styles} from './SignUpStyles';
 import {Button, Row} from '../../../components';
 import Database from '../../../constants/Config';
+import type {ComponentProp} from './SignUpTypes';
+import type { ResultSet, SQLiteDatabase, Transaction } from 'react-native-sqlite-storage';
 
-const DB = Database.getDatabase();
+const DB: SQLiteDatabase = Database.getDatabase();
 
-const SignUpScreen = ({navigation}) => {
-  const [name, setName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+const SignUpScreen: FC<ComponentProp> = ({navigation}) => {
+  const [name, setName] = useState<string>('');
+  const [mobileNumber, setMobileNumber] = useState<number>();
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [role, setRole] = useState<string>('');
 
-  const handleRegister = () => {
+  const handleRegister = (): void => {
     DB.executeSql(
       'Insert into users (name, mobile, role, username, password) values (?,?,?,?,?)',
       [name, mobileNumber, role, username, password],
-      result => {
+      (result: Transaction) => {
         console.log('User Registered Successfully');
         Alert.alert('User Registered Successfully');
 
@@ -36,17 +38,17 @@ const SignUpScreen = ({navigation}) => {
     Keyboard.dismiss();
   };
 
-  const submitHandler = async () => {
+  const submitHandler = async (): Promise<void> => {
     if (!name || !mobileNumber || !username || !password || !role) {
       Alert.alert('Enter all fields');
       return;
     }
 
-    await DB.transaction(async tx => {
+    await DB.transaction(async (tx: Transaction) => {
       tx.executeSql(
         'select * from users where username = ?',
         [username],
-        (result, set) => {
+        (result: Transaction, set: ResultSet) => {
           if (set.rows.length > 0) {
             Alert.alert('User already exists');
             return;
@@ -60,10 +62,6 @@ const SignUpScreen = ({navigation}) => {
       );
     });
   };
-
-  useEffect(() => {
-    console.log('Navigation: ', navigation);
-  }, []);
 
   return (
     <View style={{flex: 1, padding: 20}}>
